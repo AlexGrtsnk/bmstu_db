@@ -18,9 +18,31 @@ $$ LANGUAGE plpgsql;
 
 select * from work2()
 
--- no work 3
+-- or
+CREATE OR REPLACE FUNCTION work2_getus(u_id INT = 0) -- По умолчанию == 0.
+RETURNS users AS '
+    SELECT *
+    FROM customers
+    WHERE userr_id = u_id;
+' LANGUAGE  sql;
 
--- no work 4
+-- get_user(id) - вернет один кортеж.
+-- Т.к. известно, что этот кортеж типа "user"
+-- То мы можем селект запросом вывести этот кортеж как таблицу.
+SELECT *
+FROM get_user(21);
+
+
+-- no work 3
+CREATE OR REPLACE FUNCTION work3() RETURNS TABLE(price1 int, kolvo int) as $$
+    BEGIN
+    return QUERY ( SELECT price, qua from orders inner join products p on p.product_id = orders.prod_prod_id);
+    END;
+$$ LANGUAGE plpgsql;
+
+select * from work3()
+
+-- work 4
 CREATE OR REPLACE FUNCTION work4() RETURNS TABLE(ommmm int, shippingnn date, statunns int)
 as $$
 begin
@@ -114,7 +136,33 @@ call work7(2);
 
 
 -- no work 8
+CREATE OR REPLACE PROCEDURE work8_metadata(name VARCHAR) -- Получает название таблицы.
+AS '
+    -- Инфа про метаданные:
+    -- https://postgrespro.ru/docs/postgresql/9.6/infoschema-columns
+    DECLARE
+        myCursor CURSOR FOR
+            SELECT column_name,
+                   data_type
+           -- INFORMATION_SCHEMA обеспечивает доступ к метаданным о базе данных.
+           -- columns - данные о столбацых.
+            FROM information_schema.columns
+            WHERE table_name = name;
+        -- RECORD - переменная, которая подстравивается под любой тип.
+        tmp RECORD;
+BEGIN
+        OPEN myCursor;
+        LOOP
+            FETCH myCursor
+            INTO tmp;
+            EXIT WHEN NOT FOUND;
+            RAISE NOTICE ''column name = %; data type = %'', tmp.column_name, tmp.data_type;
+        END LOOP;
+        CLOSE myCursor;
+END;
+' LANGUAGE plpgsql;
 
+CALL metadata('customers');
 
 
 

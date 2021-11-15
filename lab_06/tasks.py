@@ -76,7 +76,7 @@ def task5(cur, con = None):
                 message=f"Минимальная цена из первой категории: {row[0]}")
 
 
-def task6(cur, con = None):
+def task6(cur, con = None): #WORK
     root = Tk()
 
     root.title('Задание 1')
@@ -97,38 +97,14 @@ def task6(cur, con = None):
 
 
 def task7(cur, con=None):
-    root = Tk()
+    cur.execute("CALL work5(1, 2);")
 
-    root.title('Задание 7')
-    root.geometry("300x400")
-    root.configure(bg="lavender")
-    root.resizable(width=False, height=False)
-
-    names = ["идентификатор",
-             "компанию",
-             "год издания",
-             "цвет",
-             "цену"]
-
-    param = list()
-
-    i = 0
-    for elem in names:
-        Label(root, text=f"Введите {elem}:",
-              bg="lavender").place(x=70, y=i + 25)
-        elem = Entry(root)
-        i += 50
-        elem.place(x=70, y=i, width=150)
-        param.append(elem)
-
-    b = Button(root, text="Выполнить",
-               command=lambda: execute_task7(cur, param, con),  bg="thistle3")
-    b.place(x=70, y=300, width=150)
-
-    root.mainloop()
+    #row = cur.fetchone()
+    mb.showinfo(title="Результат",
+                message=f"Все отработало")
 
 
-def task8(cur, con = None):
+def task8(cur, con = None): #WORK
     # Информация:
     # https://postgrespro.ru/docs/postgrespro/10/functions-info
     cur.execute(
@@ -140,13 +116,13 @@ def task8(cur, con = None):
 
 def task9(cur, con):
     cur.execute(" \
-        CREATE TABLE IF NOT EXISTS blacklist \
+        CREATE TABLE IF NOT EXISTS couriers \
         ( \
-            user_id INT, \
-            FOREIGN KEY(user_id) REFERENCES users(id), \
-            world_id INT, \
-            FOREIGN KEY(world_id) REFERENCES world(id), \
-            reason VARCHAR \
+            courier_id INT, \
+            car_type INT, \
+            login varchar, \
+            password varchar, \
+            salary int \
         ) ")
 
     con.commit()
@@ -163,9 +139,11 @@ def task10(cur, con):
     root.configure(bg="lavender")
     root.resizable(width=False, height=False)
 
-    names = ["идентификатор человека",
-             "идентификатор мира",
-             "причину"]
+    names = ["id курьера",
+             "тип машины(1 - легковая, B; 2 - грузовая, B; 3 - Грузовая C; 4 - Фура; 5 - фура двойной сцепки",
+             "логин ЛК комании",
+             "пароль ЛК комании",
+             "зарплату"]
 
     param = list()
 

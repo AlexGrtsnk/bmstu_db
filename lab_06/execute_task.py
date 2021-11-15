@@ -63,7 +63,7 @@ def execute_task4(cur, table_name, con):
     create_list_box(rows, "Задание 4", 17)
 
 
-def execute_task6(cur, user_id):
+def execute_task6(cur, user_id): # Доделать
     user_id = user_id.get()
     print(user_id)
     try:
@@ -71,10 +71,10 @@ def execute_task6(cur, user_id):
     except:
         mb.showerror(title="Ошибка", message="Введите число!")
         return
-
+    # походу из третьей надо бы переделать ворк2 и ворк3, тка как вроде бы мой 2 это 3 ыыы
     # get_user - Подставляемая табличная функция.
     # Возвращает пользователя по id.
-    cur.execute("SELECT * FROM get_user(%s)", (user_id,))
+    cur.execute("SELECT * FROM work3(%s)", (user_id,))
 
     rows = cur.fetchone()
 
@@ -121,14 +121,16 @@ def execute_task7(cur, param, con):
 
 def execute_task10(cur, param, con):
     try:
-        user_id = int(param[0].get())
-        world_id = int(param[1].get())
-        reason = param[2].get()
+        courier_id = int(param[0].get())
+        car_type = int(param[1].get())
+        login = param[2].get()
+        password = param[3].get()
+        salary = int(param[4].get())
     except:
         mb.showerror(title="Ошибка", message="Некорректные параметры!")
         return
 
-    print(user_id, world_id, reason)
+    print(courier_id, car_type, login, password, salary)
 
     cur.execute(
         "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='blacklist'")
@@ -138,8 +140,8 @@ def execute_task10(cur, param, con):
         return
 
     try:
-        cur.execute("INSERT INTO blacklist VALUES(%s, %s, %s)",
-                    (user_id, world_id, reason))
+        cur.execute("INSERT INTO couriers VALUES(%s, %s, %s, %s, %s)",
+                    (courier_id, car_type, login, password, salary))
     except:
         mb.showerror(title="Ошибка!", message="Ошибка запроса!")
         # Откатываемся.
@@ -149,4 +151,4 @@ def execute_task10(cur, param, con):
     # Фиксируем изменения.
     con.commit()
 
-    mb.showinfo(title="Информация!", message="Нарушитель добавлен!")
+    mb.showinfo(title="Информация!", message="Курьер добавлен")
