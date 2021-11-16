@@ -6,7 +6,8 @@ def task1(cur, con = None):
         WHERE order_status= 5 \
         GROUP BY order_status", (st,))
     row = cur.fetchone()
-    print("Кол-во заказов в статусе"+str(st)+ "составляет: " + row[0])
+    print(f"Кол-во игроков в возрасте {st} составляет: {row[0]}")
+    #print("Кол-во заказов в статусе"+str(st)+ "составляет: " + row[0])
 
 def task2(cur, con = None):
     print("id людей, которые имеют статус заказа пять и скидку больше 50% \n")
@@ -26,7 +27,7 @@ WHERE product_id IS NOT NULL \
 GROUP BY product_id ) \
 SELECT AVG(NumberOfprods) FROM CTE")
     row = cur.fetchall()
-    print("Средняя цена за продукт" + row[0])
+    print(f"Средняя цена за продукт {row[0]}")
 
 def task4(cur, con):
     table_name = input("Введите название таблицы: ")
@@ -47,9 +48,32 @@ def task5(cur, con = None):
     row = cur.fetchone()
     print(f"Минимальная цена из первой категории: {row[0]}")
 
-def task7(cur, con=None):
-    cur.execute("CALL work5(1, 2);")
 
+def task6(cur, con = None):
+    cur.execute("select * from work3();")
+    rows = cur.fetchall()
+    print("Таблица количество и цена: ")
+    print(rows)
+
+def task7(cur, con):
+    try:
+        cur.execute("CALL work5(3, 8);")
+    except:
+        con.rollback()
+        print("error")
+        return
+    con.commit()
+    #row = cur.fetchone()
+    print("Все отработало")
+
+def task8(cur, con=None):
+    try:
+        cur.execute("call work6();")
+    except:
+        con.rollback()
+        print("error")
+        return
+    con.commit()
     #row = cur.fetchone()
     print("Все отработало")
 
@@ -62,7 +86,7 @@ def task9(cur, con):
             login varchar, \
             password varchar, \
             salary int \
-        ) ")
+        );")
     con.commit()
     print("Таблица успешно создана!")
 
@@ -78,22 +102,17 @@ def task10(cur, con):
     for elem in names:
         elem = input(f"Введите {elem}: ")
         param.append(elem)
+    print(param)
     try:
-        courier_id = int(param[0].get())
-        car_type = int(param[1].get())
-        login = param[2].get()
-        password = param[3].get()
-        salary = int(param[4].get())
+        courier_id = int(param[0])
+        car_type = int(param[1])
+        login = str(param[2])
+        password = str(param[3])
+        salary = int(param[4])
     except:
         print("Error")
         return
     print(courier_id, car_type, login, password, salary)
-
-    cur.execute(
-        "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='blacklist'")
-    if not cur.fetchone():
-        print("Ошибка, таблица не создана ")
-        return
     try:
         cur.execute("INSERT INTO couriers VALUES(%s, %s, %s, %s, %s)",
                     (courier_id, car_type, login, password, salary))
