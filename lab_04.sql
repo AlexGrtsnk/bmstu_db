@@ -80,3 +80,66 @@ CALL add_courier(1, 5, 'vbcnsbds', 'password', 150000);
 
 
 -- work 5
+
+-- Создаем представление, т.к. таблицы не могут иметь INSTEAD OF triggers.
+CREATE VIEW couriers_new AS
+SELECT *
+FROM couriers
+WHERE courier_id < 15;
+
+SELECT * FROM couriers_new;
+
+-- Заменяем удаление на мягкое удаление.
+CREATE OR REPLACE FUNCTION del_couriers_func()
+RETURNS TRIGGER
+AS $$
+old_id = TD["old"]["courier_id"]
+rv = plpy.execute(f" \
+UPDATE couriers_new SET login = \'none\'  \
+WHERE couriers_new.courier_id = {old_id}")
+
+return TD["new"]
+$$ LANGUAGE plpython3u;
+
+CREATE TRIGGER del_user_trigger
+-- INSTEAD OF - Сработает вместо указанной операции.
+INSTEAD OF DELETE ON couriers_new
+-- Триггер с пометкой FOR EACH ROW вызывается один раз для каждой строки,
+-- изменяемой в процессе операции.
+FOR EACH ROW
+EXECUTE PROCEDURE del_couriers_func();
+
+DELETE FROM couriers_new
+WHERE login = 'gghvvccd';
+
+SELECT * FROM couriers_new;
+
+
+-- work 6
+
+-- Тип содержит статус заказа и кол-во таких статусов.
+CREATE TYPE status_count AS
+(
+	orders_status INT,
+	count INT
+);
+drop function get_status_count;
+CREATE OR REPLACE FUNCTION get_status_count(clr INT)
+RETURNS status_count
+AS
+$$
+plan = plpy.prepare("      \
+SELECT order_status, COUNT(order_status) \
+FROM orders                \
+WHERE order_status = $1           \
+GROUP BY order_status", ["INT"])
+
+# return value
+rv = plpy.execute(plan, [clr])
+
+# nrows - возвращает кол-во строк, обработанных командой.
+if (rv.nrows()):
+    return (rv[0]["order_status"], rv[0]["count"])
+$$ LANGUAGE plpython3u;
+
+SELECT * FROM get_status_count(2);
